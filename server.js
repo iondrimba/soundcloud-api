@@ -62,14 +62,9 @@ app.get('/', async () => {
   return { status: 200 };
 })
 
-const start = async () => {
-  try {
-    await app.listen(process.env.PORT || 3001);
-  } catch (err) {
-    app.log.error(err);
-
-    process.exit(1);
-  }
+const start = () => {
+  app.listen(process.env.PORT || 3001, '0.0.0.0')
+    .catch(err => app.log.error(err));
 }
 
 start();
