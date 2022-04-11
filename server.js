@@ -60,7 +60,7 @@ app.get('/api', async () => {
 
 const start = async () => {
   try {
-    await app.listen(3001);
+    await app.listen(process.env.PORT || 3001);
   } catch (err) {
     app.log.error(err);
 
