@@ -58,6 +58,10 @@ app.get('/api', async () => {
   }
 })
 
+app.get('/', async () => {
+  return { status: 200 };
+})
+
 const start = async () => {
   try {
     await app.listen(process.env.PORT || 3001);
