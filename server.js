@@ -3,7 +3,6 @@ require('dotenv').config();
 const NodeCache = require('node-cache');
 const fastify = require('fastify');
 const cors = require('fastify-cors');
-
 const auth = require('./src/auth');
 const playlist = require('./src/playlist');
 const stream = require("./src/stream");
@@ -24,19 +23,17 @@ async function authenticate() {
 
 app.get('/api/stream/:trackid', async (request) => {
   try {
-    await authenticate();
-  } catch (error) {
-    app.log.error('/api/stream:auth error', error);
-  }
-
-  try {
     const token = localCache.get('auth');
 
-    await stream.requestTrack(token.access_token, request.params.trackid);
+    if (!localCache.get('stream')) {
+      await stream.requestTrack(token.access_token, request.params.trackid);
 
-    const streamTrack = await stream.streamTrack(token.access_token, request.params.trackid);
+      const streamTrack = await stream.streamTrack(token.access_token, request.params.trackid);
 
-    return streamTrack.data;
+      localCache.set('stream', streamTrack.data, ttl);
+    }
+
+    return localCache.get('stream');
   } catch (error) {
     app.log.error('/api/stream:stream error');
   }
@@ -44,15 +41,13 @@ app.get('/api/stream/:trackid', async (request) => {
 
 app.get('/api', async () => {
   try {
-    await authenticate();
-  } catch (error) {
-    app.log.error('/api:auth error', error);
-  }
+    if (!localCache.get('tracks')) {
+      const resultPlaylist = await playlist(localCache.get('auth').access_token);
 
-  try {
-    const resultPlaylist = await playlist(localCache.get('auth').access_token);
+      localCache.set('tracks', resultPlaylist.data.tracks, ttl);
+    }
 
-    return resultPlaylist.data.tracks;
+    return localCache.get('tracks');
   } catch (error) {
     app.log.error('playlist error');
   }
@@ -63,6 +58,10 @@ app.get('/', async () => {
 })
 
 const start = () => {
+  fastify.addHook('preHandler', async () => {
+    await authenticate();
+  })
+
   app.listen(process.env.PORT || 3001, '0.0.0.0')
     .catch(err => app.log.error(err));
 }
