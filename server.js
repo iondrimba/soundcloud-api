@@ -2,7 +2,6 @@ require('dotenv').config();
 
 const NodeCache = require('node-cache');
 const fastify = require('fastify');
-const cors = require('fastify-cors');
 const auth = require('./src/auth');
 const playlist = require('./src/playlist');
 const stream = require("./src/stream");
@@ -11,7 +10,17 @@ const localCache = new NodeCache();
 
 const app = fastify({ logger: true });
 
-app.register(cors, {});
+app.register(require('@fastify/cors'), {
+  origin: (origin, cb) => {
+    if (/https\:\/\/playlist\.iondrimbafilho.me/.test(origin)) {
+      cb(null, true);
+
+      return;
+    }
+
+    cb(new Error("Not allowed"));
+  }
+})
 
 async function authenticate() {
   if (!localCache.get('auth')) {
@@ -58,9 +67,16 @@ app.get('/', async () => {
 })
 
 const start = () => {
-  fastify.addHook('preHandler', async () => {
-    await authenticate();
+  app.addHook('preHandler', async (request) => {
+    try {
+      await authenticate();
+    } catch (error) {
+      throw new Error(error);
+    }
+
+    return
   })
+
 
   app.listen(process.env.PORT || 3001, '0.0.0.0')
     .catch(err => app.log.error(err));
