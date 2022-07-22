@@ -34,15 +34,11 @@ app.get('/api/stream/:trackid', async (request) => {
   try {
     const token = localCache.get('auth');
 
-    if (!localCache.get('stream')) {
-      await stream.requestTrack(token.access_token, request.params.trackid);
+    await stream.requestTrack(token.access_token, request.params.trackid);
 
-      const streamTrack = await stream.streamTrack(token.access_token, request.params.trackid);
+    const streamTrack = await stream.streamTrack(token.access_token, request.params.trackid);
 
-      localCache.set('stream', streamTrack.data, ttl);
-    }
-
-    return localCache.get('stream');
+    return streamTrack.data;
   } catch (error) {
     app.log.error('/api/stream:stream error');
   }
