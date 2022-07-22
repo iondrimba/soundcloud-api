@@ -3,11 +3,11 @@
   "version": "0.1.0",
   "private": true,
   "engines": {
-    "node": "17.9.0",
-    "npm": "8.5.5"
+    "node": "16.16.0",
+    "npm": "8.11.0"
   },
   "scripts": {
-    "start": "node server"
+    "start": "node index"
   },
   "dependencies": {
     "@fastify/cors": "^7.0.0",
