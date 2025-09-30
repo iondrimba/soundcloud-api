@@ -11,7 +11,7 @@
   },
   "dependencies": {
     "@fastify/cors": "^7.0.0",
-    "axios": "^0.26.1",
+    "axios": "^0.30.2",
     "dotenv": "^8.2.0",
     "fastify": "^3.29.4",
     "node-cache": "^5.1.2"
